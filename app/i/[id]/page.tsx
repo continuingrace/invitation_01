@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getInvitation, formatInvitationDate } from "@/lib/invitations";
+import Image from "@/app/components/Image";
+import InfoRow from "@/app/components/InfoRow";
+import { formatInvitationDate, getInvitation } from "@/lib/invitations";
 import RsvpForm from "./rsvp-form";
 
 export const dynamic = "force-dynamic";
@@ -14,25 +15,38 @@ export default async function InvitationPage({
   const invitation = await getInvitation(id);
   if (!invitation) notFound();
 
+  const formattedDate = formatInvitationDate(invitation.dateTime);
+
   return (
-    <main className="guest-page">
-      <Link className="guest-brand" href="/create">모임의 온도 <span>초대장</span></Link>
-      <article className="guest-invitation">
-        <div className="guest-hero"><div className="sun-shape"/><span>YOU ARE INVITED</span><div className="art-line art-line-one"/><div className="art-line art-line-two"/><div className="flower flower-one">✳</div><div className="flower flower-two">✳</div></div>
-        <div className="guest-content">
-          <p className="preview-overline">A DAY TO REMEMBER</p>
-          <h1>{invitation.title}</h1>
-          <div className="preview-divider">✦</div>
-          <p className="guest-message">{invitation.message}</p>
-          <div className="guest-details">
-            <div className="detail-icon">◷</div><div><span>DATE & TIME</span><p>{formatInvitationDate(invitation.dateTime)}</p></div>
-            <div className="detail-icon">⌖</div><div><span>PLACE</span><p>{invitation.location}</p></div>
-          </div>
-          <RsvpForm invitationId={id} />
+    <main className="figma-guest-page">
+      <section className="figma-guest-cover">
+        <h1 className="type-title-lg">{invitation.title}</h1>
+        <Image alt="" aria-hidden="true" size="character" src="/figma/invitation-character.png" />
+        <div className="figma-cover-detail">
+          <span className="type-caption-md">일시</span>
+          <p className="type-body-md">{formattedDate}</p>
         </div>
-        <div className="preview-footer">WITH LOVE, SEE YOU THERE</div>
-      </article>
-      <footer className="guest-footer">모임의 온도 · 소중한 초대에 응답해 주세요</footer>
+        <div className="figma-cover-detail">
+          <span className="type-caption-md">장소</span>
+          <p className="type-body-md">{invitation.location}</p>
+        </div>
+      </section>
+
+      <section className="figma-guest-body" aria-label="초대 내용">
+        <Image alt="" aria-hidden="true" size="flag" src="/figma/invitation-flag.png" />
+        <p className="type-body-compact">{invitation.message}</p>
+      </section>
+
+      <section className="figma-event-info" aria-label="행사 정보">
+        <div className="figma-event-info-card">
+          <InfoRow label="일시" value={formattedDate} />
+          <InfoRow label="장소" value={invitation.location} />
+        </div>
+      </section>
+
+      <section className="figma-rsvp-section">
+        <RsvpForm invitationId={id} />
+      </section>
     </main>
   );
 }

@@ -1,6 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Button from "@/app/components/Button";
+import InfoRow from "@/app/components/InfoRow";
+import InputField from "@/app/components/InputField";
+import Label from "@/app/components/Label";
+import RadioOption from "@/app/components/RadioOption";
+import RSVPCard from "@/app/components/RSVPCard";
+import Stepper from "@/app/components/Stepper";
 
 export default function RsvpForm({ invitationId }: { invitationId: string }) {
   const [name, setName] = useState("");
@@ -37,33 +44,57 @@ export default function RsvpForm({ invitationId }: { invitationId: string }) {
 
   if (isComplete) {
     return (
-      <section className="rsvp-complete" aria-live="polite">
-        <div className="success-mark">✓</div>
-        <h2>응답을 전했어요</h2>
-        <p>{name}님, 소중한 답변 감사합니다.</p>
-      </section>
+      <RSVPCard className="figma-rsvp-card" state="done">
+        <div className="figma-rsvp-result">
+          <InfoRow label="이름" type="spread" value={name} />
+          <InfoRow label="참석 여부" type="spread" value={attending ? "참석" : "불참"} />
+          <InfoRow label="동반 인원" type="spread" value={`${attending ? companionCount : 0}명`} />
+        </div>
+      </RSVPCard>
     );
   }
 
   return (
-    <form className="rsvp-form" onSubmit={submit}>
-      <div className="form-section-heading"><span className="step-number">RSVP</span><div><h2>참석 여부를 알려 주세요</h2><p>호스트에게 답변이 전달됩니다.</p></div></div>
-      <label className="field-label" htmlFor="guest-name">이름 <span>필수</span></label>
-      <input id="guest-name" className="text-input" autoComplete="name" maxLength={80} placeholder="이름을 입력해 주세요" required value={name} onChange={(event) => setName(event.target.value)} />
-
-      <fieldset className="attendance-fieldset">
-        <legend className="field-label">참석 여부 <span>필수</span></legend>
-        <div className="attendance-options">
-          <button type="button" className={`attendance-option ${attending === true ? "selected" : ""}`} aria-pressed={attending === true} onClick={() => setAttending(true)}><span className="option-icon">✓</span>참석할게요</button>
-          <button type="button" className={`attendance-option ${attending === false ? "selected" : ""}`} aria-pressed={attending === false} onClick={() => setAttending(false)}><span className="option-icon">–</span>마음만 함께할게요</button>
+    <RSVPCard className="figma-rsvp-card">
+      <form className="figma-rsvp-form" onSubmit={submit}>
+        <div className="figma-rsvp-field">
+          <Label>이름</Label>
+          <InputField
+            autoComplete="name"
+            id="guest-name"
+            maxLength={80}
+            placeholder="이름을 입력해주세요"
+            required
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
         </div>
-      </fieldset>
 
-      {attending && <div className="guest-count-row"><div><label className="field-label" htmlFor="companion-count">동반 인원 <span>본인 제외</span></label><p>함께 오시는 분의 수를 입력해 주세요.</p></div><div className="stepper"><button type="button" aria-label="동반 인원 줄이기" onClick={() => setCompanionCount((count) => Math.max(0, count - 1))}>−</button><span>{companionCount}</span><button type="button" aria-label="동반 인원 늘리기" onClick={() => setCompanionCount((count) => Math.min(19, count + 1))}>+</button></div></div>}
+        <fieldset className="figma-attendance-fieldset">
+          <legend><Label>참석 여부</Label></legend>
+          <div className="figma-attendance-options">
+            <RadioOption checked={attending === true} id="attending" label="참석" name="attendance" onChange={() => setAttending(true)} />
+            <RadioOption checked={attending === false} id="declined" label="불참" name="attendance" onChange={() => setAttending(false)} />
+          </div>
+        </fieldset>
 
-      {error && <p className="form-error" role="alert">{error}</p>}
-      <button className="button button-dark publish-button" type="submit" disabled={isSubmitting}>{isSubmitting ? "전달하고 있어요…" : "응답 보내기"}<span>↗</span></button>
-      <p className="form-footnote">입력한 이름과 참석 여부는 초대장 주인에게 보여요.</p>
-    </form>
+        {attending && (
+          <div className="figma-rsvp-field">
+            <Label>동반 인원</Label>
+            <Stepper
+              value={companionCount}
+              onDecrease={() => setCompanionCount((count) => Math.max(0, count - 1))}
+              onIncrease={() => setCompanionCount((count) => Math.min(19, count + 1))}
+            />
+            <p className="type-caption-md">본인을 제외하고 함께 오는 인원이에요.</p>
+          </div>
+        )}
+
+        {error && <p className="figma-rsvp-error type-caption-md" role="alert">{error}</p>}
+        <Button className="figma-rsvp-submit" size="lg" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "전달하고 있어요…" : "참석 여부 보내기"}
+        </Button>
+      </form>
+    </RSVPCard>
   );
 }
