@@ -9,7 +9,13 @@ import RadioOption from "@/app/components/RadioOption";
 import RSVPCard from "@/app/components/RSVPCard";
 import Stepper from "@/app/components/Stepper";
 
-export default function RsvpForm({ invitationId }: { invitationId: string }) {
+export default function RsvpForm({
+  invitationId,
+  isDemoInvitation = false,
+}: {
+  invitationId: string;
+  isDemoInvitation?: boolean;
+}) {
   const [name, setName] = useState("");
   const [attending, setAttending] = useState<boolean | null>(null);
   const [companionCount, setCompanionCount] = useState(0);
@@ -27,6 +33,11 @@ export default function RsvpForm({ invitationId }: { invitationId: string }) {
     setError("");
     setIsSubmitting(true);
     try {
+      if (isDemoInvitation) {
+        setIsComplete(true);
+        return;
+      }
+
       const response = await fetch(`/api/invitations/${invitationId}/responses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,7 +89,7 @@ export default function RsvpForm({ invitationId }: { invitationId: string }) {
           </div>
         </fieldset>
 
-        {attending && (
+        {attending !== false && (
           <div className="figma-rsvp-field">
             <Label>동반 인원</Label>
             <Stepper
