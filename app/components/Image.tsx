@@ -3,7 +3,7 @@ import { ImgHTMLAttributes } from "react";
 
 type ImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   src: string;
-  size?: "character" | "flag";
+  size?: "character";
 };
 
 export default function Image({ alt = "", className = "", size = "character", ...props }: ImageProps) {

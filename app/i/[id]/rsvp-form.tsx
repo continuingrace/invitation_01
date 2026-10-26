@@ -74,7 +74,7 @@ export default function RsvpForm({
             autoComplete="name"
             id="guest-name"
             maxLength={80}
-            placeholder="이름을 입력해주세요"
+            placeholder="이름을 입력해 주세요"
             required
             value={name}
             onChange={(event) => setName(event.target.value)}

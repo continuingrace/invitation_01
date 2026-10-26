@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 import Button from "@/app/components/Button";
+import Image2_1 from "@/app/components/Image2_1";
 
 type InvitationDraft = { title: string; dateTime: string; location: string; message: string };
 const emptyDraft: InvitationDraft = { title: "", dateTime: "", location: "", message: "" };
@@ -47,6 +48,6 @@ export default function CreatePage() {
       <label className="figma-create-field" htmlFor="location"><span className="type-label-lg">장소 <em>필수</em></span><input id="location" maxLength={240} required placeholder="장소명과 주소를 입력해 주세요" value={draft.location} onChange={(event) => update("location", event.target.value)} /></label>
       <label className="figma-create-field" htmlFor="message"><span className="type-label-lg">본문 <em>필수</em></span><textarea id="message" rows={4} maxLength={2000} required placeholder="초대의 말을 입력해 주세요" value={draft.message} onChange={(event) => update("message", event.target.value)} /></label>
       {error && <p className="figma-form-error type-body-md" role="alert">{error}</p>}<Button className="figma-create-primary" size="lg" type="submit" disabled={isSubmitting}>{isSubmitting ? "초대장을 발행하고 있어요" : "초대장 발행하기"}</Button>
-    </form><section className="figma-create-preview" aria-label="초대장 미리보기"><div className="figma-preview-cover"><Image src="/figma/invitation-character.png" width={201} height={201} alt="" priority /><p className="type-body-md">{formatDate(draft.dateTime)}</p><h2 className="type-title-lg">{draft.title || "초대장 제목"}</h2></div><div className="figma-preview-body"><Image src="/figma/invitation-flag.png" width={48} height={48} alt="" /><p className="type-body-compact">{draft.message || "초대의 말이 여기에 표시돼요."}</p><div><span>일시</span><strong>{formatDate(draft.dateTime)}</strong></div><div><span>장소</span><strong>{draft.location || "장소를 입력해 주세요"}</strong></div></div></section></div>}
+    </form><section className="figma-create-preview" aria-label="초대장 미리보기"><div className="figma-preview-cover"><Image src="/figma/invitation-character.png" width={201} height={201} alt="" priority /><p className="type-body-md">{formatDate(draft.dateTime)}</p><h2 className="type-title-lg">{draft.title || "초대장 제목"}</h2></div><div className="figma-preview-body"><Image2_1 className="figma-preview-flag" alt="" /><p className="figma-preview-message type-body-compact">{draft.message || "초대의 말이 여기에 표시돼요."}</p><div><span>일시</span><strong>{formatDate(draft.dateTime)}</strong></div><div><span>장소</span><strong>{draft.location || "장소를 입력해 주세요"}</strong></div></div></section></div>}
   </main>;
 }

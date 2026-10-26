@@ -10,6 +10,9 @@ export type InvitationInput = {
 };
 
 export type Invitation = InvitationInput & {
+  subtitle?: string;
+  introductionTitle?: string;
+  coverVariant?: "default" | "invitationCover2";
   id: string;
   responseKey: string;
   createdAt: string;

@@ -3,10 +3,13 @@ import type { Invitation, Rsvp } from "@/lib/invitations";
 export const demoInvitation: Invitation = {
   id: "d3e0111c0ffeec0ffee0000000000000",
   responseKey: "demo-response-key-for-lecture-use-only-0000000000000000000000000000",
-  title: "허들링 클럽 가을 모임",
-  dateTime: "2026-11-14T09:00:00.000Z",
-  location: "서울시 중구 세종대로 110, 지하 1층 커뮤니티 라운지",
-  message: "오랜만에 한자리에 모여 근황을 나누고, 올 한 해의 이야기를 함께 나눠요.",
+  subtitle: "슬로우워커",
+  introductionTitle: "가을 아침, 함께 걸어요.",
+  coverVariant: "invitationCover2",
+  title: "남산하늘길 산책 모임",
+  dateTime: "2026-11-04T00:00:00.000Z",
+  location: "서울역 10번 출구 앞",
+  message: "남산하늘길은 계단과 턱 없는 데크길입니다.\n누구나 천천히 쉽게 올라갈 수 있어요!\n\n부지런한 청설모와 다람쥐들이 많이 지나다녀요.\n가을 아침 산책하고 내려와서는 커피 한 잔해요!",
   createdAt: "2026-10-20T09:00:00.000Z",
 };
 
