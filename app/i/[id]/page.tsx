@@ -5,7 +5,6 @@ import Image2 from "@/app/components/Image2";
 import Image2_1 from "@/app/components/Image2_1";
 import InfoRow from "@/app/components/InfoRow";
 import { formatInvitationDate, getInvitation } from "@/lib/invitations";
-import { demoInvitation } from "@/lib/mock";
 import RsvpForm from "./rsvp-form";
 
 export const dynamic = "force-dynamic";
@@ -16,12 +15,11 @@ export default async function InvitationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const isDemoInvitation = id === "demo" || id === demoInvitation.id;
-  const invitation = isDemoInvitation ? demoInvitation : await getInvitation(id);
+  const invitation = await getInvitation(id);
   if (!invitation) notFound();
 
   const formattedDate = formatInvitationDate(invitation.dateTime);
-  const usesInvitationCover2 = isDemoInvitation && invitation.coverVariant === "invitationCover2";
+  const usesInvitationCover2 = invitation.coverVariant === "invitationCover2";
 
   return (
     <main className="figma-guest-page">
@@ -89,7 +87,7 @@ export default async function InvitationPage({
 
       <section className="figma-rsvp-section">
         <div className="figma-rsvp-content">
-          <RsvpForm invitationId={id} isDemoInvitation={isDemoInvitation} />
+          <RsvpForm invitationId={id} />
         </div>
       </section>
     </main>

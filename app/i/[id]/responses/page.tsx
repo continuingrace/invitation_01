@@ -1,7 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { notFound } from "next/navigation";
 import { formatInvitationDate, getInvitation, getRsvps } from "@/lib/invitations";
-import { demoInvitation, demoRsvps, emptyInvitation, emptyRsvps } from "@/lib/mock";
 
 export const dynamic = "force-dynamic";
 
@@ -11,19 +10,15 @@ function StatCard({ label, value, emphasis = false }: { label: string; value: nu
 
 export default async function ResponsesPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ key?: string | string[] }> }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const isDemoRoute = id === "demo" || id === demoInvitation.id;
-  const isEmptyRoute = id === "empty";
-  const isTestRoute = isDemoRoute || isEmptyRoute;
-  const invitation = isDemoRoute ? demoInvitation : isEmptyRoute ? emptyInvitation : await getInvitation(id);
+  const invitation = await getInvitation(id);
   if (!invitation) notFound();
-  if (!isTestRoute) {
-    const providedKey = typeof query.key === "string" ? query.key : "";
-    const providedKeyBytes = Buffer.from(providedKey);
-    const expectedKeyBytes = Buffer.from(invitation.responseKey);
-    const hasValidKey = providedKeyBytes.length === expectedKeyBytes.length && timingSafeEqual(providedKeyBytes, expectedKeyBytes);
-    if (!hasValidKey) notFound();
-  }
-  const responses = isDemoRoute ? demoRsvps : isEmptyRoute ? emptyRsvps : await getRsvps(id);
+  const providedKey = typeof query.key === "string" ? query.key : "";
+  const providedKeyBytes = Buffer.from(providedKey);
+  const expectedKeyBytes = Buffer.from(invitation.responseKey);
+  const hasValidKey = providedKeyBytes.length === expectedKeyBytes.length && timingSafeEqual(providedKeyBytes, expectedKeyBytes);
+  if (!hasValidKey) notFound();
+
+  const responses = await getRsvps(id);
   const attendingResponses = responses.filter((response) => response.attending);
   const declinedResponses = responses.filter((response) => !response.attending);
   const attendeeTotal = attendingResponses.length + attendingResponses.reduce((total, response) => total + response.companionCount, 0);

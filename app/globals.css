@@ -663,6 +663,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight: var(--font-weight-body-md);
   line-height: var(--text-body-md--line-height);
 }
+.figma-rsvp-card-done .ds-success-icon {
+  width: var(--spacing-guide-group);
+  height: var(--spacing-guide-group);
+}
+.figma-rsvp-card-done .ds-icon-check {
+  width: auto;
+  height: auto;
+  font-size: var(--text-heading-lg);
+  line-height: 1;
+}
 .figma-rsvp-form { display: grid; gap: var(--spacing-stack-lg); width: 100%; }
 .figma-rsvp-field { display: grid; gap: var(--spacing-inline-compact); }
 .figma-rsvp-field > p { margin: 0; color: var(--color-text-tertiary); }
@@ -678,6 +688,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   width: var(--spacing-page-horizontal);
   height: var(--spacing-page-horizontal);
   margin-inline: var(--spacing-guide-row);
+  accent-color: var(--color-button2-hover);
 }
 .figma-event-info-card .ds-info-row > span { flex: 0 0 auto; white-space: nowrap; }
 .figma-event-info-card .ds-info-row > strong { min-width: 0; overflow-wrap: anywhere; }

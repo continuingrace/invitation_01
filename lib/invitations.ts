@@ -1,6 +1,6 @@
+import "server-only";
+
 import { randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 
 export type InvitationInput = {
   title: string;
@@ -29,86 +29,105 @@ export type Rsvp = RsvpInput & {
   createdAt: string;
 };
 
-const dataDirectory = path.join(process.cwd(), ".data", "invitations");
-const validId = /^[a-f0-9]{32}$/;
+type SupabaseTable = "invitations" | "rsvps";
+const demoInvitationSlug = "ihiri_invitiation";
 
-function invitationDirectory(id: string) {
-  if (!validId.test(id)) return null;
-  return path.join(dataDirectory, id);
+function resolveInvitationId(id: string) {
+  return id === "demo" || id === demoInvitationSlug ? demoInvitationSlug : id;
+}
+
+function getSupabaseConfig() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!url || !key) {
+    throw new Error("Supabase 환경변수 설정을 확인해 주세요.");
+  }
+
+  return { url: url.replace(/\/$/, ""), key };
+}
+
+async function supabaseRequest<T>(table: SupabaseTable, query: URLSearchParams, options: {
+  method?: "GET" | "POST";
+  body?: unknown;
+  returnRepresentation?: boolean;
+} = {}): Promise<T> {
+  const { url, key } = getSupabaseConfig();
+  const headers = new Headers({ apikey: key });
+
+  if (options.body !== undefined) headers.set("Content-Type", "application/json");
+  if (options.returnRepresentation) headers.set("Prefer", "return=representation");
+
+  const response = await fetch(`${url}/rest/v1/${table}?${query.toString()}`, {
+    method: options.method ?? "GET",
+    headers,
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase 요청에 실패했습니다. (HTTP ${response.status})`);
+  }
+
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
 }
 
 export async function createInvitation(input: InvitationInput) {
-  const id = randomUUID().replaceAll("-", "");
-  const directory = invitationDirectory(id)!;
-  await mkdir(directory, { recursive: true });
-
   const invitation: Invitation = {
     ...input,
-    id,
+    id: randomUUID().replaceAll("-", ""),
     responseKey: randomBytes(32).toString("hex"),
     createdAt: new Date().toISOString(),
   };
 
-  await writeFile(path.join(directory, "invitation.json"), JSON.stringify(invitation), "utf8");
-  return invitation;
+  const query = new URLSearchParams({ select: "id,responseKey" });
+  const rows = await supabaseRequest<Pick<Invitation, "id" | "responseKey">[]>("invitations", query, {
+    method: "POST",
+    body: invitation,
+    returnRepresentation: true,
+  });
+
+  if (!rows[0]) throw new Error("Supabase에서 생성된 초대장 정보를 받지 못했습니다.");
+  return { ...invitation, ...rows[0] };
 }
 
 export async function getInvitation(id: string): Promise<Invitation | null> {
-  const directory = invitationDirectory(id);
-  if (!directory) return null;
-
-  try {
-    const contents = await readFile(path.join(directory, "invitation.json"), "utf8");
-    return JSON.parse(contents) as Invitation;
-  } catch {
-    return null;
-  }
+  const query = new URLSearchParams({
+    select: "id,title,dateTime,location,message,subtitle,introductionTitle,coverVariant,responseKey,createdAt",
+    id: `eq.${resolveInvitationId(id)}`,
+    limit: "1",
+  });
+  const rows = await supabaseRequest<Invitation[]>("invitations", query);
+  return rows[0] ?? null;
 }
 
 export async function addRsvp(id: string, input: RsvpInput) {
-  const directory = invitationDirectory(id);
-  if (!directory || !(await getInvitation(id))) return false;
+  if (!(await getInvitation(id))) return false;
 
-  const responseDirectory = path.join(directory, "responses");
-  await mkdir(responseDirectory, { recursive: true });
-  const response: Rsvp = {
+  const response: Rsvp & { invitation_id: string } = {
     ...input,
     id: randomUUID(),
+    invitation_id: resolveInvitationId(id),
     createdAt: new Date().toISOString(),
   };
+  const query = new URLSearchParams({ select: "id" });
+  const rows = await supabaseRequest<Pick<Rsvp, "id">[]>("rsvps", query, {
+    method: "POST",
+    body: response,
+    returnRepresentation: true,
+  });
 
-  await writeFile(path.join(responseDirectory, `${response.id}.json`), JSON.stringify(response), "utf8");
-  return true;
+  return rows.length > 0;
 }
 
 export async function getRsvps(id: string): Promise<Rsvp[]> {
-  const directory = invitationDirectory(id);
-  if (!directory || !(await getInvitation(id))) return [];
-
-  try {
-    const responseDirectory = path.join(directory, "responses");
-    const files = await readdir(responseDirectory);
-    const responses = await Promise.all(
-      files.filter((file) => file.endsWith(".json")).map(async (file) => {
-        const contents = await readFile(path.join(responseDirectory, file), "utf8");
-        const stored = JSON.parse(contents) as Rsvp & { attendeeCount?: number };
-        if (typeof stored.companionCount === "number") return stored;
-
-        // Older responses stored the total count including the person who replied.
-        return {
-          id: stored.id,
-          name: stored.name,
-          attending: stored.attending,
-          companionCount: stored.attending ? Math.max(0, (stored.attendeeCount ?? 1) - 1) : 0,
-          createdAt: stored.createdAt,
-        };
-      }),
-    );
-
-    return responses.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  } catch {
-    return [];
-  }
+  const query = new URLSearchParams({
+    select: "id,name,attending,companionCount,createdAt",
+    invitation_id: `eq.${resolveInvitationId(id)}`,
+    order: "createdAt.desc",
+  });
+  return supabaseRequest<Rsvp[]>("rsvps", query);
 }
 
 export function formatInvitationDate(dateTime: string) {

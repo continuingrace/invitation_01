@@ -11,10 +11,8 @@ import Stepper from "@/app/components/Stepper";
 
 export default function RsvpForm({
   invitationId,
-  isDemoInvitation = false,
 }: {
   invitationId: string;
-  isDemoInvitation?: boolean;
 }) {
   const [name, setName] = useState("");
   const [attending, setAttending] = useState<boolean | null>(null);
@@ -33,11 +31,6 @@ export default function RsvpForm({
     setError("");
     setIsSubmitting(true);
     try {
-      if (isDemoInvitation) {
-        setIsComplete(true);
-        return;
-      }
-
       const response = await fetch(`/api/invitations/${invitationId}/responses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

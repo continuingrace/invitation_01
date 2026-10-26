@@ -41,3 +41,13 @@
 - 외부 서비스 비밀 키가 필요하면 `.env.local`에만 저장하고, 클라이언트 코드나 `NEXT_PUBLIC_` 변수로 노출하지 않는다. 데이터베이스 접근은 서버에서만 수행한다.
 - `.data/`의 실제 응답 데이터는 공유하거나 저장소에 올리지 않는다. 외부 서비스 전송과 파괴적 작업은 실행 전에 사용자에게 확인한다.
 - 파일·폴더 삭제, 의존성 설치·삭제, DB 스키마 변경, 커밋·푸시·배포는 실행 전에 사용자에게 확인한다.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
